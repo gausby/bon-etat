@@ -1,0 +1,26 @@
+{
+  "name": "bon-etat",
+  "version": "1.0.0",
+  "description": "A finite state machine",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/*.js"
+  },
+  "keywords": [
+    "fsm",
+    "state machine"
+  ],
+  "bin": "./index.js",
+  "author": "Martin Gausby <martin@gausby.dk> (http://martin.gausby.dk/)",
+  "license": "MIT",
+  "dependencies": {
+    "generate-function": "2.0.0"
+  },
+  "devDependencies": {
+    "tape": "2.14.0"
+  },
+  "repository": "git@github.com:gausby/bon-etat.git",
+  "bugs": {
+    "url": "https://github.com/gausby/bon-etat/issues"
+  }
+}
