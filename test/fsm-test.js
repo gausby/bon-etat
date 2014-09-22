@@ -164,3 +164,35 @@ test('should handle the \'nice\'-example found on wikipedia', function(t) {
 	t.equals(machine.state, 'nice');
 });
 
+test('should handle double quotes as input', function(t) {
+	t.plan(1);
+	var machine = new FSM({
+		initial: { '"': 'double quote' },
+		'double quote': {}
+	});
+
+	machine.change('"');
+	t.equal(machine.state, 'double quote');
+});
+
+test('should handle single quotes as input', function(t) {
+	t.plan(1);
+	var machine = new FSM({
+		initial: { "'": 'single quote' },
+		'single quote': {}
+	});
+
+	machine.change("\'");
+	t.equal(machine.state, 'single quote');
+});
+
+test('should handle backslash as input', function(t) {
+	t.plan(1);
+	var machine = new FSM({
+		initial: { "\\": 'backslash' },
+		backslash: {}
+	});
+
+	machine.change("\\");
+	t.equal(machine.state, 'backslash');
+});
