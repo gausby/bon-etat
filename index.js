@@ -27,10 +27,36 @@ function generateEmit(fn, from, to) {
 	return fn;
 }
 
+function generateBeforeEmit(fn, from, to) {
+	var From = from[0].toUpperCase() + from.substring(1);
+	var To = to[0].toUpperCase() + to.substring(1);
+
+	if (from === '"') from = '\"';
+	if (to === '"') to = '\"';
+	if (from === '\\') from = '\\\\';
+	if (to === '\\') to = '\\\\';
+
+	fn('this.emit("beforeUpdate", "%s", "%s")', from, to);
+	if (from === to) {
+		fn('this.emit("beforeStaying", "%s")', from);
+		fn('this.emit("beforeStayingIn%s")', From);
+	}
+	else {
+		fn('this.emit("beforeLeaving%s", "%s")', From, to);
+		fn('this.emit("beforeEntering%s", "%s")', To, from);
+		fn('this.emit("beforeGoingFrom%sTo%s", "%s", "%s")', From, To, from, to);
+	}
+
+	return fn;
+}
+
+
 function updateState(fn, from, to) {
+	generateBeforeEmit(fn, from, to);
 	if (from !== to) {
 		fn('this.state = "%s"', to);
 	}
+	generateEmit(fn, from, to);
 	fn('return "%s"', to);
 
 	return fn;
@@ -73,14 +99,14 @@ FSM.prototype.init = function(config) {
 			}
 			else {
 				fn((firstRun ? '' : 'else {'));
-				generateEmit(fn, from, newState);
 				updateState(fn, from, newState);
+
 				fn((firstRun ? '' : '}'));
 				return fn;
 			}
 
-			generateEmit(fn, from, newState);
 			updateState(fn, from, newState);
+
 			firstRun = false;
 			fn('}');
 			

@@ -73,7 +73,7 @@ test('should emit an update(from, to) event changing state', function(t) {
 		a: { b: 'b' },
 		b: { a: 'a' }
 	});
-	machine.on('update', function(from, to) {
+	machine.on('beforeUpdate', function(from, to) {
 		t.equal(from, 'a');
 		t.equal(to, 'b');
 	});

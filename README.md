@@ -60,6 +60,8 @@ The following events will get emitted if a state update causes the state machine
 
 Only the update event will emit on all update-events.
 
+Prefix any event with `before` if you want to trigger an event before the state change.
+
 
 ## Install
 
