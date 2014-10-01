@@ -3,10 +3,11 @@ var FSM = require('../index.js');
 
 test('test transit into a new state', function(t) {
 	t.plan(2);
-	var machine = new FSM({
+	var Machine = FSM({
 		a: { a: 'a', b: 'b' },
 		b: { a: 'a', b: 'b' }
 	});
+	var machine = new Machine();
 	t.equal(machine.state, 'a');
 	machine.change('b');
 	t.equal(machine.state, 'b');
@@ -14,9 +15,10 @@ test('test transit into a new state', function(t) {
 
 test('should stay at the state state if it transitions into an unknown state', function(t) {
 	t.plan(2);
-	var machine = new FSM({
+	var Machine = FSM({
 		initial: { a: 'c' }
 	});
+	var machine = new Machine();
 	t.equal(machine.state, 'initial');
 	machine.change('z');
 	t.equal(machine.state, 'initial');
@@ -24,10 +26,11 @@ test('should stay at the state state if it transitions into an unknown state', f
 
 test('test underscore as catch all', function(t) {
 	t.plan(1);
-	var machine = new FSM({
+	var Machine = FSM({
 		initial: { _: 'b' },
 		b: { initial: 'initial' }
 	});
+	var machine = new Machine();
 	machine.change('z');
 	t.equal(machine.state, 'b');
 });
@@ -37,11 +40,12 @@ test('catch alls should always be the last element in list', function(t) {
 	// as the last thing, thus in this example `a` should be evaluated before
 	// `_`, and reach the `foo` state instead of the `baz` state.
 	t.plan(2);
-	var machine = new FSM({
+	var Machine = FSM({
 		initial: { _: 'baz', a: 'foo' },
 		baz: { _: 'initial' },
 		foo: { _: 'initial' }
 	});
+	var machine = new Machine();
 	machine.change('a');
 	t.notEqual(machine.state, 'baz');
 	t.equal(machine.state, 'foo');
@@ -49,7 +53,7 @@ test('catch alls should always be the last element in list', function(t) {
 
 test('should support regular expressions', function(t) {
 	t.plan(2);
-	var machine = new FSM({
+	var Machine = FSM({
 		lowerCase: {
 			'/[a-z]/': 'lowerCase',
 			'/[A-Z]/': 'upperCase'
@@ -59,6 +63,7 @@ test('should support regular expressions', function(t) {
 			'/[A-Z]/': 'upperCase'
 		}
 	});
+	var machine = new Machine();
 	machine.change('a');
 	machine.change('K');
 	t.equals(machine.state, 'upperCase');
@@ -69,11 +74,12 @@ test('should support regular expressions', function(t) {
 //=test-events
 test('should emit an update(from, to) event changing state', function(t) {
 	t.plan(2);
-	var machine = new FSM({
+	var Machine = FSM({
 		a: { b: 'b' },
 		b: { a: 'a' }
 	});
-	machine.on('beforeUpdate', function(from, to) {
+	var machine = new Machine();
+	machine.on('update', function(from, to) {
 		t.equal(from, 'a');
 		t.equal(to, 'b');
 	});
@@ -82,10 +88,11 @@ test('should emit an update(from, to) event changing state', function(t) {
 
 test('should emit a goingFromAtoB(from, to) event when going from a to b', function(t) {
 	t.plan(2);
-	var machine = new FSM({
+	var Machine = FSM({
 		a: { b: 'b' },
 		b: { a: 'a' }
 	});
+	var machine = new Machine();
 	machine.on('goingFromAToB', function(from, to) {
 		t.equal(from, 'a');
 		t.equal(to, 'b');
@@ -95,10 +102,11 @@ test('should emit a goingFromAtoB(from, to) event when going from a to b', funct
 
 test('should emit a leavingA(to) event when going from a to b', function(t) {
 	t.plan(1);
-	var machine = new FSM({
+	var Machine = FSM({
 		a: { b: 'b' },
 		b: { a: 'a' }
 	});
+	var machine = new Machine();
 	machine.on('leavingA', function(to) {
 		t.equal(to, 'b');
 	});
@@ -107,10 +115,11 @@ test('should emit a leavingA(to) event when going from a to b', function(t) {
 
 test('should emit an enteringB(from) event when going from a to b', function(t) {
 	t.plan(1);
-	var machine = new FSM({
+	var Machine = FSM({
 		a: { b: 'b' },
 		b: { a: 'a' }
 	});
+	var machine = new Machine();
 	machine.on('enteringB', function(from) {
 		t.equal(from, 'a');
 	});
@@ -121,7 +130,7 @@ test('should emit an enteringB(from) event when going from a to b', function(t) 
 // Random FSM examples
 test('turnstile example', function(t) {
 	t.plan(1);
-	var turnstile = new FSM({
+	var Turnstile = FSM({
 		locked: {
 			coin: 'unlocked',
 			push: 'locked'
@@ -131,7 +140,7 @@ test('turnstile example', function(t) {
 			coin: 'unlocked'
 		}
 	});
-
+	var turnstile = new Turnstile();
 	var states = [];
 	turnstile.on('update', function(to) {
 		states.push(to);
@@ -148,13 +157,14 @@ test('turnstile example', function(t) {
 
 test('should handle the \'nice\'-example found on wikipedia', function(t) {
 	t.plan(1);
-	var machine = new FSM({
+	var Machine = FSM({
 		initial: { n: 'n', _: 'initial' },
 		n: { i: 'ni', _: 'initial' },
 		ni: { c: 'nic', _: 'initial' },
 		nic: { e: 'nice' },
 		nice: { _: 'nice' }
 	});
+	var machine = new Machine();
 
 	machine.change('n');
 	machine.change('i');
@@ -166,33 +176,33 @@ test('should handle the \'nice\'-example found on wikipedia', function(t) {
 
 test('should handle double quotes as input', function(t) {
 	t.plan(1);
-	var machine = new FSM({
+	var Machine = FSM({
 		initial: { '"': 'double quote' },
 		'double quote': {}
 	});
-
+	var machine = new Machine();
 	machine.change('"');
 	t.equal(machine.state, 'double quote');
 });
 
 test('should handle single quotes as input', function(t) {
 	t.plan(1);
-	var machine = new FSM({
+	var Machine = FSM({
 		initial: { "'": 'single quote' },
 		'single quote': {}
 	});
-
+	var machine = new Machine();
 	machine.change("\'");
 	t.equal(machine.state, 'single quote');
 });
 
 test('should handle backslash as input', function(t) {
 	t.plan(1);
-	var machine = new FSM({
+	var Machine = FSM({
 		initial: { "\\": 'backslash' },
 		backslash: {}
 	});
-
+	var machine = new Machine();
 	machine.change("\\");
 	t.equal(machine.state, 'backslash');
 });

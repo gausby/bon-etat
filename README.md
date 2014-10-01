@@ -8,7 +8,8 @@ The following creates a finite state machine that defines a turnstile:
 ```js
 var FSM = require('bon-etat');
 
-var turnstile = new FSM({
+// define a state machine like this:
+var Turnstile = FSM({
     locked: {
         coin: 'unlocked',
         push: 'locked'
@@ -18,6 +19,9 @@ var turnstile = new FSM({
         coin: 'unlocked'
     }
 });
+// and create instances of this state machine like this:
+var turnstile = new Turnstile();
+var turnstile2 = new Turnstile('unlocked'); // initialized in unlocked state
 ```
 
 It is now possible to send events to the state machine (`.change`), and ask for its state (`.state`), like this:
@@ -32,7 +36,7 @@ turnstile.change('push');
 console.log(turnstile.state); // 'locked'
 ```
 
-Notice, the initial state will be the first defined state passed to the state machine. That is why the turnstile is in the *locked* state upon initialization.
+Notice, unless the state is passed in as the argument to the state machine instance, the initial state will be the first defined state passed in the state machine definition. That is why the `turnstile` is in the *locked* state upon initialization.
 
 
 ### Emitted transition events
@@ -59,8 +63,6 @@ The following events will get emitted if a state update causes the state machine
   * `stayingInA` *`function()`* the state of a specific state remained the same. ie. staying in the locked state would emit `stayingInLocked`.
 
 Only the update event will emit on all update-events.
-
-Prefix any event with `before` if you want to trigger an event before the state change.
 
 
 ## Install
