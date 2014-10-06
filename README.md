@@ -62,7 +62,29 @@ The following events will get emitted if a state update causes the state machine
   * `staying` *`function(state)`* the state did not change.
   * `stayingInA` *`function()`* the state of a specific state remained the same. ie. staying in the locked state would emit `stayingInLocked`.
 
-Only the update event will emit on all update-events.
+If a machine reaches a state with no possible states to transit into, `final` (`function(to)`) will get emitted.
+
+```js
+var Bridge = FSM({
+    functional: {
+        pass: 'functional',
+        burn: 'destroyed'
+    },
+    destroyed: {}
+});
+
+var bridge = new Bridge();
+bridge.on('final', function(from) {
+    console.log('got here from a %s state', from);
+});
+
+bridge.change('burn');
+// "got here from a functional state"
+```
+
+From then on the machine will only emit `inFinal` (`function(state)`).
+
+Only the `update` (`function(from, to)`) event will emit on *all updates*, even if the machine stays in the same state.
 
 
 ## Install

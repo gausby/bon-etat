@@ -16,7 +16,7 @@ test('test transit into a new state', function(t) {
 test('should stay at the state state if it transitions into an unknown state', function(t) {
 	t.plan(2);
 	var Machine = FSM({
-		initial: { a: 'c' }
+		initial: {}
 	});
 	var machine = new Machine();
 	t.equal(machine.state, 'initial');
@@ -126,6 +126,18 @@ test('should emit an enteringB(from) event when going from a to b', function(t) 
 	machine.change('b');
 });
 
+test('should emit a final(from) event when entering a state with no possible actions', function(t) {
+	t.plan(1);
+	var Machine = FSM({
+		a: { b: 'b' },
+		b: {}
+	});
+	var machine = new Machine();
+	machine.on('final', function(from) {
+		t.equal(from, 'a');
+	});
+	machine.change('b');
+});
 
 // Random FSM examples
 test('turnstile example', function(t) {
@@ -192,14 +204,14 @@ test('should handle single quotes as input', function(t) {
 		'single quote': {}
 	});
 	var machine = new Machine();
-	machine.change("\'");
+	machine.change("'");
 	t.equal(machine.state, 'single quote');
 });
 
 test('should handle backslash as input', function(t) {
 	t.plan(1);
 	var Machine = FSM({
-		initial: { "\\": 'backslash' },
+		initial: { '\\': 'backslash' },
 		backslash: {}
 	});
 	var machine = new Machine();

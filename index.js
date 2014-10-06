@@ -2,7 +2,7 @@ var genfun = require('generate-function');
 
 var isRegExp = new RegExp('^\/.*\/(?:[gim]*)$');
 
-function generateEmit(fn, from, to) {
+function generateEmit(fn, from, to, config) {
 	var From = from[0].toUpperCase() + from.substring(1);
 	var To = to[0].toUpperCase() + to.substring(1);
 
@@ -22,14 +22,19 @@ function generateEmit(fn, from, to) {
 		fn('this.emit("goingFrom%sTo%s", "%s", "%s");', From, To, from, to);
 	}
 
+	// does the next state have any possible actions? If not, emit 'final'
+	if (from !== to && !Object.keys(config[to]).length) {
+		fn('this.emit("final", "%s");', from);
+	}
+
 	return fn;
 }
 
-function updateState(fn, from, to) {
+function updateState(fn, from, to, config) {
 	if (from !== to) {
 		fn('this.state = "%s";', to);
 	}
-	generateEmit(fn, from, to);
+	generateEmit(fn, from, to, config);
 	fn('return "%s";', to);
 
 	return fn;
@@ -49,30 +54,38 @@ function generateChangeFunction(fn, config) {
 
 		fn((iteration === 0 ? 'if' : 'else if') + '(this.state === "%s") {', from);
 
-		Object.keys(config[from]).sort(putWildCardsLast).reduce(function(fn, to, iteration) {
-			var newState = config[from][to];
+		var actions = Object.keys(config[from]);
+		if (actions.length) {
+			actions.sort(putWildCardsLast).reduce(function(fn, to, iteration) {
+				var newState = config[from][to];
+				//var possibleNewStates = Object.keys(config[newState]).length;
+				if (isRegExp.test(to)) {
+					fn((iteration === 0 ? 'if' : 'else if') + '(%s.test(input)) {', to);
+				}
+				else if (to !== '_'){
+					if (to === '"') to = '\\"';
+					else if (to === '\\') to = '\\\\';
+					fn((iteration === 0 ? 'if' : 'else if') + '(input === "%s") {', to);
+				}
+				else {
+					fn((iteration === 0 ? '' : 'else {'));
+					updateState(fn, from, newState, config);
+					fn((iteration === 0 ? '' : '}'));
+					return fn;
+				}
 
-			if (isRegExp.test(to)) {
-				fn((iteration === 0 ? 'if' : 'else if') + '(%s.test(input)) {', to);
-			}
-			else if (to !== '_'){
-				if (to === '"') to = '\\"';
-				else if (to === '\\') to = '\\\\';
-				fn((iteration === 0 ? 'if' : 'else if') + '(input === "%s") {', to);
-			}
-			else {
-				fn((iteration === 0 ? '' : 'else {'));
-				updateState(fn, from, newState);
-				fn((iteration === 0 ? '' : '}'));
+				updateState(fn, from, newState, config);
+				fn('}');
 				return fn;
-			}
+			}, fn);
+		}
+		else {
+			// in final state, ie. no possible state to transition to from here
+			fn('this.emit("inFinal", "%s");', from)
+			('return "%s";', from);
+		}
 
-			updateState(fn, from, newState);
-			fn('}');
-			return fn;
-		}, fn)('}')
-
-		return fn;
+		return fn('}');
 	}, fn('FSM.prototype.change = function(input) {'))('};');
 }
 
