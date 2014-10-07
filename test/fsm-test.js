@@ -139,6 +139,23 @@ test('should emit a final(from) event when entering a state with no possible act
 	machine.change('b');
 });
 
+test('should capitalize words in event names', function(t) {
+	t.plan(2);
+	var Machine = FSM({
+		initial: { 'go': 'some event' },
+		'some event': {}
+	});
+	var machine = new Machine();
+	machine.on('enteringSomeEvent', function() {
+		t.equal(machine.state, 'some event');
+	});
+	machine.on('goingFromInitialToSomeEvent', function() {
+		t.equal(machine.state, 'some event');
+	});
+
+	machine.change('go');
+});
+
 // Random FSM examples
 test('turnstile example', function(t) {
 	t.plan(1);

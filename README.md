@@ -86,6 +86,8 @@ From then on the machine will only emit `inFinal` (`function(state)`).
 
 Only the `update` (`function(from, to)`) event will emit on *all updates*, even if the machine stays in the same state.
 
+Notice: the state names will get capitalized in the events, so *some state* would become *SomeState*, ie. *enteringSomeState* or, going to 'another state': *goingFromSomeStateToAnotherState*.
+
 
 ## Install
 

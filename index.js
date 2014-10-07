@@ -2,9 +2,20 @@ var genfun = require('generate-function');
 
 var isRegExp = new RegExp('^\/.*\/(?:[gim]*)$');
 
+function capitalizedWords(string) {
+	return string
+		.toLowerCase()
+		.split(' ')
+		.map(function(word) {
+			return word[0].toUpperCase() + word.slice(1);
+		})
+		.join('')
+	;
+}
+
 function generateEmit(fn, from, to, config) {
-	var From = from[0].toUpperCase() + from.substring(1);
-	var To = to[0].toUpperCase() + to.substring(1);
+	var From = capitalizedWords(from);
+	var To = capitalizedWords(to);
 
 	if (from === '"') from = '\"';
 	if (to === '"') to = '\"';
